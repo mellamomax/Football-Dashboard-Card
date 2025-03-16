@@ -1,38 +1,22 @@
-import { LitElement, html, css } from 'lit';
-
-/** MAIN CARD CLASS */
 class FootballDashboardCard extends LitElement {
-  static get properties() {
-    return {
-      config: { type: Object },
-      hass: { type: Object },
-    };
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this.listenersAdded = false;
   }
 
-  /** Called when the card is added in the editor */
-  static getConfigElement() {
-    return document.createElement('football-dashboard-card-editor');
-  }
-
-  /** Defaults for when you add the card the first time */
-  static getStubConfig() {
-    return {
-      entity: 'sensor.football_data',
-      title: 'Football Dashboard',
-    };
-  }
-
-  /** Called when the user saves the config in the editor */
   setConfig(config) {
-    if (!config.entity) {
-      throw new Error('You need to define an entity');
+    if (!window.customElements.get('hui-generic-entity-row')) {
+      throw new Error('Resource is not loaded: hui-generic-entity-row');
     }
-    this.config = config;
-  }
 
-  /**
-   * This is called whenever Home Assistant state changes.
-   */
+    this.config = config;
+    // Only render once
+    if (!this.shadowRoot.innerHTML) {
+      this.render();
+    }
+  }
+  
   set hass(hass) {
     this._hass = hass;
     if (!this.config) return;
@@ -73,98 +57,28 @@ class FootballDashboardCard extends LitElement {
   }
 
   /** Custom CSS for the card */
-  static get styles() {
-    return css`
-      :host {
-        display: block;
-      }
-      ha-card {
-        border-radius: var(--ha-card-border-radius, 4px);
-        box-shadow: var(--ha-card-box-shadow);
-      }
-    `;
+  static getStubConfig() {
+    return {
+      entity: '',
+      teamName: '',
+      league: '',
+    };
   }
 }
 customElements.define('football-dashboard-card', FootballDashboardCard);
 
-/** CONFIG EDITOR CLASS */
-class FootballDashboardCardEditor extends LitElement {
-  static get properties() {
-    return {
-      hass: { type: Object },
-      config: { type: Object },
-    };
-  }
 
-  setConfig(config) {
-    this.config = { ...config };
-  }
+// Code to show the card in HA card-picker
+const FootballDashboardCardDescriptor = {
+    type: 'football-dashboard-card', // Must match the type you use in your YAML configuration
+    name: 'Football Dashboard Card', // Friendly name for the card picker
+    description: 'A custom card to show football dashboard', // Short description
+    preview: false, // Optional: Set to true to show a preview in the picker
+    documentationURL: 'https://justpaste.it/38sr8', // Optional: Link to your documentation (replace with your actual documentation link if available)
+};
 
-  get _entity() {
-    return this.config.entity || '';
-  }
-
-  get _title() {
-    return this.config.title || '';
-  }
-
-  render() {
-    if (!this.hass) {
-      return html`<p>Loading Home Assistant data...</p>`;
-    }
-
-    return html`
-      <div class="card-config">
-        <paper-input
-          label="Entity"
-          .value=${this._entity}
-          .configValue=${'entity'}
-          @value-changed=${this._valueChanged}
-        ></paper-input>
-
-        <paper-input
-          label="Card Title"
-          .value=${this._title}
-          .configValue=${'title'}
-          @value-changed=${this._valueChanged}
-        ></paper-input>
-      </div>
-    `;
-  }
-
-  /** Update config whenever inputs change */
-  _valueChanged(e) {
-    if (!this.config || !this.hass) return;
-    const target = e.target;
-    this.config = { ...this.config, [target.configValue]: target.value };
-    this.dispatchEvent(
-      new CustomEvent('config-changed', {
-        detail: { config: this.config },
-        bubbles: true,
-        composed: true,
-      })
-    );
-  }
-
-  static get styles() {
-    return css`
-      .card-config {
-        display: flex;
-        flex-direction: column;
-      }
-      paper-input {
-        margin-bottom: 16px;
-      }
-    `;
-  }
-}
-customElements.define('football-dashboard-card-editor', FootballDashboardCardEditor);
-
-/** DESCRIPTOR for the Lovelace card picker */
+// Ensure window.customCards is initialized
 window.customCards = window.customCards || [];
-window.customCards.push({
-  type: 'football-dashboard-card',
-  name: 'Football Dashboard Card',
-  description: 'A custom card to display football data in real time.',
-  preview: false,
-});
+
+// Add your card to the customCards array
+window.customCards.push(FootballDashboardCardDescriptor);
