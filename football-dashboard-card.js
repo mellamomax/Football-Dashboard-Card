@@ -1,4 +1,4 @@
-class FootballDashboardCard extends LitElement {
+class FootballDashboardCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -6,15 +6,7 @@ class FootballDashboardCard extends LitElement {
   }
 
   setConfig(config) {
-    if (!window.customElements.get('hui-generic-entity-row')) {
-      throw new Error('Resource is not loaded: hui-generic-entity-row');
-    }
-
     this.config = config;
-    // Only render once
-    if (!this.shadowRoot.innerHTML) {
-      this.render();
-    }
   }
   
   set hass(hass) {
