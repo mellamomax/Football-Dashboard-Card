@@ -13,7 +13,6 @@ class FootballDashboardCard extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     if (!this.config) return;
-    // (You can add dynamic state handling here if needed)
     this.render();
   }
 
@@ -23,10 +22,10 @@ class FootballDashboardCard extends HTMLElement {
       return;
     }
 
-    // Grab entity state if needed (currently not used in the UI)
+    // Grab entity state if needed
     const stateObj = this._hass.states[this.config.entity];
     const title = this.config.title || 'Football Dashboard';
-    
+
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -47,15 +46,29 @@ class FootballDashboardCard extends HTMLElement {
         }
         .header-left {
           display: flex;
-          flex-direction: column;
+          align-items: center;
+        }
+        .team-logo {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          object-fit: cover;
+          margin-right: 8px;
+        }
+        .season {
+          font-size: 14px;
+          color: #666;
+        }
+        .header-center {
+          flex: 1;
+          text-align: center;
         }
         .team-name {
           font-size: 24px;
           font-weight: bold;
         }
-        .season {
-          font-size: 14px;
-          color: #666;
+        .header-right {
+          /* Manager photo container */
         }
         .manager-photo {
           width: 48px;
@@ -91,13 +104,21 @@ class FootballDashboardCard extends HTMLElement {
         }
       </style>
       <ha-card>
+        <!-- Updated Header -->
         <div class="header">
           <div class="header-left">
-            <div class="team-name">${this.config.teamName || 'Barcelona'}</div>
+            <img class="team-logo" src="${this.config.teamLogo || 'https://via.placeholder.com/48'}" alt="Team Logo">
             <div class="season">${this.config.season || 'Season 2024/25'}</div>
           </div>
-          <img class="manager-photo" src="https://via.placeholder.com/48" alt="Manager Photo">
+          <div class="header-center">
+            <div class="team-name">${this.config.teamName || 'Barcelona'}</div>
+          </div>
+          <div class="header-right">
+            <img class="manager-photo" src="${this.config.managerPhoto || 'https://via.placeholder.com/48'}" alt="Manager Photo">
+          </div>
         </div>
+
+        <!-- Content area remains unchanged -->
         <div class="content">
           <!-- Left Column: Matches -->
           <div class="column">
@@ -150,8 +171,10 @@ class FootballDashboardCard extends HTMLElement {
     return {
       entity: '',
       teamName: '',
-      league: '',
+      teamLogo: '',
       season: '',
+      managerPhoto: '',
+      league: '',
       title: '',
     };
   }
@@ -159,7 +182,7 @@ class FootballDashboardCard extends HTMLElement {
 
 customElements.define('football-dashboard-card', FootballDashboardCard);
 
-// Descriptor to include the card in the Lovelace card picker.
+// Descriptor for the Lovelace card picker.
 const FootballDashboardCardDescriptor = {
   type: 'football-dashboard-card',
   name: 'Football Dashboard Card',
